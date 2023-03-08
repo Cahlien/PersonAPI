@@ -1,11 +1,11 @@
 version: '3.9'
 services:
   db:
-    image: postgres:13
+    image: postgres:latest
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: personapi
+      POSTGRES_USER: ${DBUSERNAME}
+      POSTGRES_PASSWORD: ${DBPASSWORD}
+      POSTGRES_DB: ${DBNAME}
     ports:
       - "5432:5432"
   app:
@@ -15,6 +15,12 @@ services:
     depends_on:
       - db
     environment:
-      DBURL: jdbc:postgresql://db:5432/personapi
-      DBUSERNAME: example_user
-      SPRING_DATASOURCE_PASSWORD: example_password
+      DBURL: ${DBURL}
+      DBUSERNAME: ${DBUSERNAME}
+      DBPASSWORD: ${DBPASSWORD}
+      SPRINGSECUSER: ${SPRINGSECUSER}
+      SPRINGSECPASS: ${SPRINGSECPASS}
+      API_ROUTE: ${API_ROUTE}
+      MATCH_PATH: ${MATCH_PATH}
+      SWAGGER_PATH: ${SWAGGER_PATH}
+

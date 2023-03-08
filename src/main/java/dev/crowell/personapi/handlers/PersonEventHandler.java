@@ -22,53 +22,34 @@ public class PersonEventHandler {
 
     @HandleBeforeCreate
     public void handleBeforeCreate(PersonEntity person) {
-        log.warn("Received request to create this instant person: {}", person);
+        log.warn("Received request to create this person: {}", person);
 
         var names = personRepository.findNames(person.getName().getGivenNames(), person.getName().getSurname());
 
         if(!names.getFirst().isEmpty()) {
-            log.info("Given names already exist, so we will not create new ones.");
             names.getFirst().forEach(
                     name -> {
+                        if(name.isEmpty()) return;
+
                         name.ifPresent(praenomen -> person.getName().getGivenNames().stream()
                                 .filter(givenName -> Objects.equals(givenName.getValue(), praenomen.getValue()))
                                 .findFirst()
                                 .ifPresent(givenName -> {
+                                    log.info(String.format("Given name %s already exists; assigning praenomen.", name.get().getValue()));
                                     givenName.setId(praenomen.getId());
                                     givenName.setValue(praenomen.getValue());
                                 }));
                     });
             } else {
-                log.info("Given names do not exist, so we will create new ones.");
+                log.info("Given name does not exist; creating praenomen.");
         }
 
         if(names.getSecond().isPresent()) {
-            log.info("Surname already exists, so we will not create a new one.");
+            log.info(String.format("Surname %s already exists; assigning cognomen.", names.getSecond().get().getValue()));
             person.getName().setSurname(names.getSecond().get());
         } else {
-            log.info("Surname does not exist, so we will create a new one.");
+            log.info("Surname does not exist; creating cognomen.");
         }
-
-//        for (Praenomen givenName : person.getName().getGivenNames()) {
-//            var name = personRepository.findGivenName(givenName.getValue());
-//
-//            if(name.isPresent()) {
-//                log.info(String.format("Given name %s already exists, so we will not create a new one.", givenName.getValue()));
-//                givenName.setId(name.get().getId());
-//                givenName.setValue(name.get().getValue());
-//            } else {
-//                log.info(String.format("Given name %s does not exist, so we will create a new one.", givenName.getValue()));
-//            }
-//        }
-//
-//        var surname = personRepository.findCognomen(person.getName().getSurname().getValue());
-//        if(surname.isPresent()) {
-//            log.info(String.format("Surname %s already exists, so we will not create a new one.", surname.get().getValue()));
-//            person.getName().getSurname().setId(surname.get().getId());
-//            person.getName().getSurname().setValue(surname.get().getValue());
-//            log.info(String.format("Surname %s does not exist, so we will create a new one.", person.getName().getSurname().getValue()));
-//        }
-
     }
 
     @HandleAfterCreate
